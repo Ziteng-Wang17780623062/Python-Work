@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理健康AI测评系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .module-card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .module-card h3 {
+            color: #764ba2;
+            margin: 15px 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-panel.show {
+            display: block;
+        }
+
+        .result-panel h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output.error {
+            color: #dc3545;
+        }
+
+        .output.success {
+            color: #28a745;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 心理健康AI测评系统</h1>
+            <p>综合评估AI模型在心理健康领域的表现</p>
+        </div>
+
+        <div class="modules-grid">
+            <!-- 危机识别与升级 - LLMs-Mental-Health-Crisis -->
+            <div class="module-card">
+                <h2>危机识别与升级 (LLMs)</h2>
+                <form id="form-crisis-llms">
+                    <div class="form-group">
+                        <label>任务类型</label>
+                        <select name="task" required>
+                            <option value="all">全部 (分类+生成)</option>
+                            <option value="classification">分类任务</option>
+                            <option value="generation">生成任务</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>样本数量 (留空使用全部)</label>
+                        <input type="number" name="limit" min="1" placeholder="例如: 10">
+                        <div class="info-text">留空则使用全部数据</div>
+                    </div>
+                    <button type="submit" class="btn">开始测评</button>
+                </form>
+            </div>
+
+            <!-- 危机识别与升级 - C-SSRS -->
+            <div class="module-card">
+                <h2>危机识别与升级 (C-SSRS)</h2>
+                <form id="form-crisis-cssrs">
+                    <div class="form-group">
+                        <label>样本数量</label>
+                        <input type="number" name="limit" min="1" required placeholder="例如: 10">
+                        <div class="info-text">必须输入正整数</div>
+                    </div>
+                    <button type="submit" class="btn">开始测评</button>
+                </form>
+            </div>
+
+            <!-- 伦理性 -->
+            <div class="module-card">
+                <h2>伦理性测评</h2>
+                <form id="form-ethics">
+                    <div class="form-group">
+                        <label>采样数量</label>
+                        <input type="number" name="sample_size" min="1" required placeholder="例如: 10">
+                        <div class="info-text">必须输入正整数</div>
+                    </div>
+                    <button type="submit" class="btn">开始测评</button>
+                </form>
+            </div>
+
+            <!-- 谄媚性 -->
+            <div class="module-card">
+                <h2>谄媚性测评</h2>
+                <form id="form-sycophancy">
+                    <div class="form-group">
+                        <label>数据集</label>
+                        <select name="dataset" required>
+                            <option value="OEQ">OEQ</option>
+                            <option value="AITA-YTA">AITA-YTA</option>
+                            <option value="PAS">PAS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>采样数量 (留空使用全部)</label>
+                        <input type="number" name="limit" min="1" placeholder="例如: 10">
+                        <div class="info-text">留空则使用全部数据</div>
+                    </div>
+                    <button type="submit" class="btn">开始测评</button>
+                </form>
+            </div>
+
+            <!-- 鲁棒性 - ESConv -->
+            <div class="module-card">
+                <h2>鲁棒性测评 (ESConv)</h2>
+                <form id="form-robustness-esconv">
+                    <div class="form-group">
+                        <label>采样数量 (留空使用全部)</label>
+                        <input type="number" name="limit" min="1" placeholder="例如: 10">
+                    </div>
+                    <div class="form-group">
+                        <label>扰动类型</label>
+                        <select name="perturbation_type" required>
+                            <option value="all">综合扰动 (字符+单词+句子)</option>
+                            <option value="character">字符级扰动</option>
+                            <option value="word">单词级扰动</option>
+                            <option value="sentence">句子级扰动</option>
+                            <option value="none">无扰动 (仅基线)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>随机种子 (留空自动生成)</label>
+                        <input type="number" name="seed" placeholder="例如: 42">
+                    </div>
+                    <button type="submit" class="btn">开始测评</button>
+                </form>
+            </div>
+
+            <!-- 鲁棒性 - SWMH -->
+            <div class="module-card">
+                <h2>鲁棒性测评 (SWMH)</h2>
+                <form id="form-robustness-swmh">
+                    <div class="form-group">
+                        <label>采样数量 (留空使用全部)</label>
+                        <input type="number" name="limit" min="1" placeholder="例如: 10">
+                    </div>
+                    <div class="form-group">
+                        <label>扰动类型</label>
+                        <select name="perturbation_type" required>
+                            <option value="all">综合扰动 (字符+单词+句子)</option>
+                            <option value="character">字符级扰动</option>
+                            <option value="word">单词级扰动</option>
+                            <option value="sentence">句子级扰动</option>
+                            <option value="none">无扰动 (仅基线)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>随机种子 (留空自动生成)</label>
+                        <input type="number" name="seed" placeholder="例如: 42">
+                    </div>
+                    <button type="submit" class="btn">开始测评</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 结果显示面板 -->
+        <div class="result-panel" id="result-panel">
+            <h3>测评结果</h3>
+            <div id="status-container"></div>
+            <div id="output-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // 表单提交处理
+        const forms = {
+            'form-crisis-llms': 'crisis_llms',
+            'form-crisis-cssrs': 'crisis_cssrs',
+            'form-ethics': 'ethics',
+            'form-sycophancy': 'sycophancy',
+            'form-robustness-esconv': 'robustness_esconv',
+            'form-robustness-swmh': 'robustness_swmh'
+        };
+
+        Object.keys(forms).forEach(formId => {
+            const form = document.getElementById(formId);
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const module = forms[formId];
+                const formData = new FormData(form);
+                const params = {};
+
+                // 处理表单数据
+                for (const [key, value] of formData.entries()) {
+                    if (value === '') {
+                        // 空值不传递
+                        continue;
+                    }
+                    if (key === 'limit' || key === 'sample_size' || key === 'seed') {
+                        params[key] = parseInt(value) || null;
+                    } else {
+                        params[key] = value;
+                    }
+                }
+
+                // 禁用按钮
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = '运行中...';
+
+                try {
+                    // 启动任务
+                    const response = await fetch(`${API_BASE}/api/run`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            module: module,
+                            params: params
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    const taskId = data.task_id;
+                    showResultPanel();
+                    pollTaskStatus(taskId, submitBtn);
+                } catch (error) {
+                    showError(error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '开始测评';
+                }
+            });
+        });
+
+        function showResultPanel() {
+            const panel = document.getElementById('result-panel');
+            panel.classList.add('show');
+            document.getElementById('status-container').innerHTML = '';
+            document.getElementById('output-container').innerHTML = '';
+        }
+
+        function updateStatus(status, message) {
+            const container = document.getElementById('status-container');
+            container.innerHTML = `
+                <div class="status ${status}">
+                    ${status === 'running' ? '<span class="loading"></span>' : ''}
+                    ${message}
+                </div>
+            `;
+        }
+
+        function filterOutput(text) {
+            if (!text) return '';
+            
+            // 按行分割
+            const lines = text.split('\n');
+            const filteredLines = [];
+            
+            for (const line of lines) {
+                // 跳过空行
+                if (line.trim() === '') {
+                    continue;
+                }
+                
+                // 跳过进度条（包含 %| 或类似格式）
+                // 匹配格式：xxx: 100%|#####| 1/1 [00:02<00:00,  2.24s/样本]
+                // 或：xxx:   0%|             | 0/1 [00:00<?, ?样本/s]
+                if (/%\s*\||\|\s*\d+\/\d+\s*\[/.test(line)) {
+                    continue;
+                }
+                
+                // 跳过只包含空格和特殊字符的行
+                if (/^[\s\u00A0\u2000-\u200B\u2028\u2029\u3000]*$/.test(line)) {
+                    continue;
+                }
+                
+                // 保留其他行
+                filteredLines.push(line);
+            }
+            
+            return filteredLines.join('\n');
+        }
+
+        function updateOutput(output, isError = false) {
+            const container = document.getElementById('output-container');
+            const className = isError ? 'error' : 'success';
+            // 过滤输出，移除进度条和空行
+            const filteredOutput = isError ? output : filterOutput(output);
+            container.innerHTML = `<div class="output ${className}">${escapeHtml(filteredOutput)}</div>`;
+        }
+
+        function showError(message) {
+            updateStatus('failed', `错误: ${message}`);
+            updateOutput(message, true);
+        }
+
+        async function pollTaskStatus(taskId, submitBtn) {
+            const maxAttempts = 3600; // 最多轮询1小时 (每1秒一次)
+            let attempts = 0;
+
+            const interval = setInterval(async () => {
+                attempts++;
+                if (attempts > maxAttempts) {
+                    clearInterval(interval);
+                    updateStatus('failed', '任务超时');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '开始测评';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/status/${taskId}`);
+                    const data = await response.json();
+
+                    if (data.status === 'running') {
+                        updateStatus('running', '任务运行中，请稍候...');
+                    } else if (data.status === 'completed') {
+                        clearInterval(interval);
+                        updateStatus('completed', '任务完成！');
+                        if (data.result) {
+                            let output = '';
+                            if (data.result.stdout) {
+                                output += data.result.stdout;
+                            }
+                            if (data.result.stderr) {
+                                // 过滤stderr中的进度条和空行
+                                const filteredStderr = filterOutput(data.result.stderr);
+                                if (filteredStderr.trim()) {
+                                    output += '\n\n错误输出:\n' + filteredStderr;
+                                }
+                            }
+                            updateOutput(output || '任务执行成功，但无输出内容');
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '开始测评';
+                    } else if (data.status === 'failed') {
+                        clearInterval(interval);
+                        updateStatus('failed', '任务失败');
+                        let errorMsg = data.error || '未知错误';
+                        if (data.result) {
+                            if (data.result.stderr) {
+                                errorMsg += '\n\n' + data.result.stderr;
+                            }
+                            if (data.result.stdout) {
+                                errorMsg += '\n\n标准输出:\n' + data.result.stdout;
+                            }
+                        }
+                        updateOutput(errorMsg, true);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '开始测评';
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    showError('无法获取任务状态: ' + error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '开始测评';
+                }
+            }, 1000); // 每秒轮询一次
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
+

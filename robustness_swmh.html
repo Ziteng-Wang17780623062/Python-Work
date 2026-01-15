@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鲁棒性测评 (SWMH) - 心理健康AI测评系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← 返回主页</a>
+        <div class="header">
+            <h1>鲁棒性测评 (SWMH)</h1>
+            <p>评估AI在分类任务中的鲁棒性</p>
+        </div>
+        <div class="module-card">
+            <div class="description">
+                <strong>📝 说明：</strong>
+                <ul>
+                    <li><strong>采样数量</strong>：可选，留空则使用全部数据</li>
+                    <li><strong>扰动类型</strong>：可选择字符级、单词级、句子级、综合扰动或无扰动</li>
+                    <li><strong>随机种子</strong>：可选，留空自动生成</li>
+                    <li>结果会保存在模块的 outputs 目录中</li>
+                </ul>
+            </div>
+            <h2>参数配置</h2>
+            <form id="evaluation-form">
+                <div class="form-group">
+                    <label>采样数量 (留空使用全部)</label>
+                    <input type="number" name="limit" min="1" placeholder="例如: 10">
+                </div>
+                <div class="form-group">
+                    <label>扰动类型 *</label>
+                    <select name="perturbation_type" required>
+                        <option value="all">综合扰动 (字符+单词+句子)</option>
+                        <option value="character">字符级扰动</option>
+                        <option value="word">单词级扰动</option>
+                        <option value="sentence">句子级扰动</option>
+                        <option value="none">无扰动 (仅基线)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>随机种子 (留空自动生成)</label>
+                    <input type="number" name="seed" placeholder="例如: 42">
+                </div>
+                <button type="submit" class="btn" id="submit-btn">开始测评</button>
+            </form>
+        </div>
+        <div class="result-panel" id="result-panel">
+            <h3>测评结果</h3>
+            <div id="status-container"></div>
+            <div id="output-container"></div>
+        </div>
+    </div>
+    <script src="common.js"></script>
+    <script>
+        const MODULE_NAME = "robustness_swmh";
+        initModule();
+    </script>
+</body>
+</html>
+

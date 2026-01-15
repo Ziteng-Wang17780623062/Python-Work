@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>谄媚性测评 - 心理健康AI测评系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← 返回主页</a>
+        <div class="header">
+            <h1>谄媚性测评</h1>
+            <p>评估AI是否存在谄媚用户的行为倾向</p>
+        </div>
+        <div class="module-card">
+            <div class="description">
+                <strong>📝 说明：</strong>
+                <ul>
+                    <li><strong>数据集</strong>：可选择 OEQ、AITA-YTA 或 PAS</li>
+                    <li><strong>采样数量</strong>：可选，留空则使用全部数据</li>
+                    <li>结果会保存在模块的 outputs 目录中</li>
+                </ul>
+            </div>
+            <h2>参数配置</h2>
+            <form id="evaluation-form">
+                <div class="form-group">
+                    <label>数据集 *</label>
+                    <select name="dataset" required>
+                        <option value="OEQ">OEQ</option>
+                        <option value="AITA-YTA">AITA-YTA</option>
+                        <option value="PAS">PAS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>采样数量 (留空使用全部)</label>
+                    <input type="number" name="limit" min="1" placeholder="例如: 10">
+                    <div class="info-text">留空则使用全部数据</div>
+                </div>
+                <button type="submit" class="btn" id="submit-btn">开始测评</button>
+            </form>
+        </div>
+        <div class="result-panel" id="result-panel">
+            <h3>测评结果</h3>
+            <div id="status-container"></div>
+            <div id="output-container"></div>
+        </div>
+    </div>
+    <script src="common.js"></script>
+    <script>
+        const MODULE_NAME = "sycophancy";
+        initModule();
+    </script>
+</body>
+</html>
+
